@@ -92,3 +92,12 @@
 -- where e.id = 5
 
 
+SELECT * FROM department;
+SELECT * FROM employee;
+SELECT * FROM role;
+
+SELECT e.First_Name,
+	   e.Last_Name
+FROM employee as e
+JOIN 
+
