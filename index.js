@@ -4,7 +4,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "emidayo777",
+    password: "",
     database: "employeedb"
   });
 
@@ -31,13 +31,13 @@ getUserInfo();
         "Add Emloyee",
         "Remove Employee",
         "Update Employee Role",
-        "Update Employee Manager",
+        // "Update Employee Manager",
         "View All Roles",
         "Add Role",
-        "Remove Role",
+        // "Remove Role",
         "View All Departments",
         "Add Department",
-        "Remove Department",
+        // "Remove Department",
         "Quit"
 
       ]}
@@ -57,6 +57,27 @@ getUserInfo();
         case "Add Emloyee":
             addEmployee()
             break;
+        case "Remove Employee":
+            removeEmployee()
+            break;
+        case "Update Employee Role":
+            updateEmployeeRole()
+            break;
+        case "View All Roles":
+            viewAllRoles()
+            break;
+        case "Add Role":
+            addRole()
+            break;
+        case "View All Departments":
+            viewAllDepartments()
+            break;
+        case "Add Department":
+            addDepartment()
+            break;
+        case "Quit":
+            quit();
+            break;   
     
     }
 
@@ -77,7 +98,9 @@ getUserInfo();
                         ON e.manager_id = e2.id`, 
                         function(err, result) {
                                 if (err) console.log(err);
-                                console.table(result);
+                                console.log("\n\n\n\n")
+                                console.table(result)
+                                console.log("\n\n\n\n\n\n\n");;
                                 //return result
         });
         getUserInfo();
@@ -113,7 +136,10 @@ getUserInfo();
                         WHERE d.name = '${byDepartment}'`, 
                         function(err, result) {
                                 if (err) console.log(err);
-                                console.table(result);});
+                                console.log("\n\n\n\n")
+                                console.table(result)
+                                console.log("\n\n\n\n\n\n\n");});
+        getUserInfo();
     
    }
    async function getAllEmployeesByManager(){
@@ -147,8 +173,10 @@ getUserInfo();
                         WHERE concat(e2.First_Name,  ' ',  e2.Last_Name) = '${byManager}'`, 
                         function(err, result) {
                             if (err) console.log(err);
-                            console.table(result);});
- 
+                            console.log("\n\n\n\n")
+                            console.table(result)
+                            console.log("\n\n\n\n\n\n\n");});
+                            getUserInfo();
     }
     async function addEmployee(){
         const {firstName, lastName, role, manager} = await inquirer.prompt([
@@ -176,9 +204,153 @@ getUserInfo();
     function(err, result) {
         if (err) console.log(err);
         console.log("Welcome to our company");});
-       
+        getUserInfo();
     }
+
+    async function removeEmployee(){
+      const {name} = await inquirer.prompt([
+          {
+              message: "What is the employee's name?",
+              name: "name"
+          }     
+      ])
+
+    connection.query(` DELETE FROM Employee WHERE concat( First_Name,  ' ',  Last_Name) = '${name}' `, 
+  function(err, result) {
+      if (err) console.log(err);
+      console.log("success");});
+      getUserInfo();
+  }
+
+  async function updateEmployeeRole(){
+    const {name, newRole} = await inquirer.prompt([
+      {
+        type: "list",
+        message: "Which employee's role do you want to update?",
+        name: "name",
+        choices: [
+          "John Doe",
+          "Make Chen",
+          "Ashley Rodriguez",
+          "Kevin Tupik",
+          "Kunal Singh",
+          "Malis Brown", 
+          "Sarah Lourd",
+          "Tom Allen", 
+          "Hugo Smith"
+          
+              
+      ]},
+      {
+        type: "list",
+        message: "Which role do you want to assign the selected employee?",
+        name: "newRole",
+        choices: [
+          "Sales Lead", 
+          "Salesperson", 
+          "Lead Engineer",
+          "Software Engineer",
+          "Account Manager",
+          "Accountant",
+          "Legal Team Lead",
+          "Lawyer",
+          "HR"       
+      ]},
+
+    ]);
+
+  connection.query(` UPDATE employee as e 
+                      SET e.role_id = (SELECT id FROM role WHERE title = '${newRole}')
+                      WHERE concat( e.First_Name,  ' ',  e.Last_Name) = '${name}'`, 
+function(err, result) {
+    if (err) console.log(err);
+    console.log("success");});
+    getUserInfo();
+}
+
+function viewAllRoles(){
+
+  connection.query(`SELECT id,title,salary FROM role`, 
+                  function(err, result) {
+                          if (err) console.log(err);
+                          console.log("\n\n\n\n")
+                          console.table(result)
+                          console.log("\n\n\n\n\n\n\n");;
+                          
+  });
+  getUserInfo();
+}
     
 
+async function addRole(){
+  const {nameRole, salary, department} = await inquirer.prompt([
+    {
+      message: "What is the name of role?",
+      name: "nameRole"
+    },
+    {
+      message: "What is the salary of the role?",
+      name: "salary"
+    },
+    
+    {
+        type: "list",
+        message: "Which department does the role belong to?",
+        name: "department",
+        choices: [
+          "Sales", 
+          "Engineering", 
+          "Finance",
+          "Legal",
+          "HR"
+  ]}
+]);
+
+
+connection.query(`INSERT INTO role(title , salary, department_id)
+VALUES( '${nameRole}', '${salary}', ( SELECT id FROM department WHERE name = '${department}' ))`, 
+                  function(err, result) {
+                          if (err) console.log(err);
+                          console.log("\n\n\n\n")
+                          console.table(result)
+                          console.log("\n\n\n\n\n\n\n");});
+  getUserInfo();
+
+}
+function viewAllDepartments(){
+
+  connection.query(`SELECT * FROM department`, 
+                  function(err, result) {
+                          if (err) console.log(err);
+                          console.log("\n\n\n\n")
+                          console.table(result)
+                          console.log("\n\n\n\n\n\n\n");;
+                          
+  });
+  getUserInfo();
+}
+
+
+async function addDepartment(){
+  const {nameDepartment} = await inquirer.prompt([
+    {
+      message: "What is the name of the department?",
+      name: "nameDepartment"
+    }
+]);
+
+connection.query(`INSERT INTO department(name)
+VALUES( '${nameDepartment}')`, 
+                  function(err, result) {
+                          if (err) console.log(err);
+                          console.log("\n\n\n\n")
+                          console.table(result)
+                          console.log("\n\n\n\n\n\n\n");});
+  getUserInfo();
+
+  } 
+  function quit(){
+    console.log("Good bye!");
+  }
  }
  
